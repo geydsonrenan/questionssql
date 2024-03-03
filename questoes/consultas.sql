@@ -168,3 +168,7 @@ where nota < (select avg(nota)
 select sigla
 from evento e
 where e.cod IN (select cod from artigo a where a.cod = e.cod);
+
+/* CONSULTA 46 - PROJETAR O PERCENTUAL DE PESQUISADORES POR INSTITUIÇÃO */
+select distinct instituicao, ((select count(*) from pesquisador p1 where p1.instituicao = p.instituicao)/(select count(*) from pesquisador))*100 as "%"
+from pesquisador p
