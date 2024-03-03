@@ -123,3 +123,48 @@ WHERE (INSTITUICAO, TO_CHAR(NASCIMENTO,'YY')) IN
       FROM PESQUISADOR
       GROUP BY INSTITUICAO)
 ORDER BY INSTITUICAO;
+
+/* CONSULTA 40 - PROJETAR OS NOMES DOS PESQUISADORES QUE POSSUEM ARTIGOS 
+NÃO PUBLICADO - USANDO “= ANY”, pois é equivalente ao “IN”) */
+select nome
+from pesquisador p
+where cpf = ANY (select cpf
+    			from escreve e
+    			where not exists (select cod from artigo a where a.mat = e.mat) and
+    			e.cpf = p.cpf);
+
+/* CONSULTA 41 - PROJETAR OS NOMES DOS PESQUISADORES,  EXCETO O DO MAIS VELHO */
+select nome, nascimento
+from pesquisador p
+where nascimento <> (select MIN(nascimento)
+    				from pesquisador p);
+
+/* CONSULTA 43 - PROJETAR OS TÍTULOS DOS ARTIGOS COM NOTA MAIOR DO QUE TODOS OS ARTIGOS DO EVENTO ‘SBBD21’ */
+select titulo
+from artigo a
+where nota > (select max(nota)
+    			from artigo a2
+    			where a2.cod = (select cod from evento e where sigla = 'SBBD21'));
+
+/* CONSULTA 47 - PROJETAR QUAIS SÃO AS INSTITUIÇÕES QUE TÊM MAIS PESQUISADORES DO QUE A MÉDIA */
+select distinct instituicao
+from pesquisador p
+where (select count(*) from pesquisador p1 where p.instituicao = p1.instituicao) > (select count(p2.cpf) from pesquisador p2)/(select count(p3.instituicao) from pesquisador p3);
+
+/* CONSULTA 48 - PROJETAR AS SIGLAS DOS EVENTOS COM ARTIGOS PUBLICADOS */
+select sigla
+from evento e
+where exists (select cod from artigo a where e.cod = a.cod);
+
+/* CONSULTA 51 - PROJETAR OS TÍTULOS DOS ARTIGOS COM NOTA ABAIXO DA MÉDIA DOS ARTIGOS PUBLICADOS NO MESMO EVENTO*/
+select titulo, nota
+from artigo a
+where nota < (select avg(nota)
+    			from artigo a2
+    			where a.cod = a2.cod
+    			group by a2.cod);
+
+/* CONSULTA 53 - PROJETAR AS SIGLAS DOS EVENTOS SEM ARTIGOS PUBLICADOS – USANDO “NOT IN” */
+select sigla
+from evento e
+where e.cod IN (select cod from artigo a where a.cod = e.cod);
