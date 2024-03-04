@@ -171,4 +171,14 @@ where e.cod IN (select cod from artigo a where a.cod = e.cod);
 
 /* CONSULTA 46 - PROJETAR O PERCENTUAL DE PESQUISADORES POR INSTITUIÇÃO */
 select distinct instituicao, ((select count(*) from pesquisador p1 where p1.instituicao = p.instituicao)/(select count(*) from pesquisador))*100 as "%"
+from pesquisador p;
+
+-- para exibir os CPF e os nomes dos pesquisadores que escrevem mais artigos do que a média dos pesquisadores da sua instituição 
+select nome, cpf
 from pesquisador p
+where ((select count(*) from escreve e where p.cpf = e.cpf group by cpf) >
+    (select avg(MEDIA)
+    from (select count(cpf) as MEDIA
+    		from escreve e2
+    		where e2.cpf in (select cpf from pesquisador p2 where p2.instituicao = p.instituicao)
+    		group by cpf)));
